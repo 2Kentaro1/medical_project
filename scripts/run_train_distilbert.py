@@ -12,7 +12,7 @@ torch.set_num_threads(4)
 # src を import path に追加
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "..", "src"))
-DATA_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "..", "data", "processed", "train_clean.parquet"))
+DATA_PATH = "/content/drive/MyDrive/medical_project_data/processed/train_clean.parquet"
 SAVE_DIR = "/content/drive/MyDrive/medical_project/models"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
@@ -76,7 +76,7 @@ def main():
 
         model.save_pretrained(fold_dir)
         tokenizer.save_pretrained(fold_dir)
-        
+
         print(f"Saved model to: {fold_dir}")
 
 
