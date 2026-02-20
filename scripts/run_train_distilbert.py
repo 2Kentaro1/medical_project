@@ -6,6 +6,9 @@ from sklearn.model_selection import StratifiedKFold
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from torch.optim import AdamW
 
+# CPU 最適化
+torch.set_num_threads(4)
+
 # src を import path に追加
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "..", "src"))
@@ -15,6 +18,7 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 
 print("SRC_PATH:", SRC_PATH)  # デバッグ用
 print("DATA_PATH:", DATA_PATH)  # デバッグ用
+print("SAVE_DIR:", SAVE_DIR)
 
 if SRC_PATH not in sys.path:
     sys.path.append(SRC_PATH)
@@ -33,9 +37,7 @@ def main():
     # データ読み込み
     df = pd.read_parquet(DATA_PATH)
 
-    tokenizer = AutoTokenizer.from_pretrained(
-        "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract"
-    )
+    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
@@ -45,14 +47,14 @@ def main():
         train_df = df.iloc[train_idx]
         val_df = df.iloc[val_idx]
 
-        train_ds = TextDataset(train_df, tokenizer)
-        val_ds = TextDataset(val_df, tokenizer)
+        train_ds = TextDataset(train_df, tokenizer, max_len=256)
+        val_ds = TextDataset(val_df, tokenizer, max_len=256)
 
-        train_loader = torch.utils.data.DataLoader(train_ds, batch_size=8, shuffle=True)
-        val_loader = torch.utils.data.DataLoader(val_ds, batch_size=16, shuffle=False)
+        train_loader = torch.utils.data.DataLoader(train_ds, batch_size=4, shuffle=True)
+        val_loader = torch.utils.data.DataLoader(val_ds, batch_size=8, shuffle=False)
 
         model = AutoModelForSequenceClassification.from_pretrained(
-            "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract",
+            "distilbert-base-uncased",
             num_labels=1
         ).to(device)
 
