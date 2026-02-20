@@ -1,0 +1,25 @@
+# --- 基本 ---
+numpy
+pandas
+scikit-learn
+
+# --- NLP（テキスト前処理・特徴量生成） ---
+nltk
+spacy
+scikit-learn
+sentence-transformers
+transformers
+
+# --- 可視化 ---
+matplotlib
+seaborn
+
+# --- Notebook ---
+jupyter
+ipykernel
+
+# --- モデル保存 ---
+joblib
+
+# --- 補助 ---
+tqdm
