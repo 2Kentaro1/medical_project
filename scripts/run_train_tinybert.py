@@ -14,6 +14,13 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "..", "src"))
 DATA_PATH = "/content/drive/MyDrive/medical_project_data/processed/train_clean.parquet"
 SAVE_DIR = "/content/drive/MyDrive/medical_project/models"
+
+# ★ モデル名（フォルダ名に変換する）
+MODEL_NAME = "huawei-noah/TinyBERT_General_4L_312D"
+MODEL_DIR_NAME = MODEL_NAME.split("/")[-1].lower()  # tinybert_general_4l_312d
+
+# ★ MODEL ごとに保存フォルダを分ける
+SAVE_DIR = f"/content/drive/MyDrive/medical_project/models/{MODEL_DIR_NAME}"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 print("SRC_PATH:", SRC_PATH)  # デバッグ用
@@ -37,7 +44,7 @@ def main():
     # データ読み込み
     df = pd.read_parquet(DATA_PATH)
 
-    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
@@ -47,14 +54,14 @@ def main():
         train_df = df.iloc[train_idx]
         val_df = df.iloc[val_idx]
 
-        train_ds = TextDataset(train_df, tokenizer, max_len=256)
-        val_ds = TextDataset(val_df, tokenizer, max_len=256)
+        train_ds = TextDataset(train_df, tokenizer, max_len=128)
+        val_ds = TextDataset(val_df, tokenizer, max_len=128)
 
-        train_loader = torch.utils.data.DataLoader(train_ds, batch_size=4, shuffle=True)
-        val_loader = torch.utils.data.DataLoader(val_ds, batch_size=8, shuffle=False)
+        train_loader = torch.utils.data.DataLoader(train_ds, batch_size=8, shuffle=True)
+        val_loader = torch.utils.data.DataLoader(val_ds, batch_size=16, shuffle=False)
 
         model = AutoModelForSequenceClassification.from_pretrained(
-            "distilbert-base-uncased",
+            MODEL_NAME,
             num_labels=1
         ).to(device)
 
