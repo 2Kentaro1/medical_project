@@ -28,8 +28,8 @@ if SRC_PATH not in sys.path:
     sys.path.append(SRC_PATH)
 
 # 自作モジュール
-from models.datasetClass import TextDataset
 from models.predict import predict
+from models.datasetClass import PredictionDataset
 
 
 def main():
@@ -44,7 +44,7 @@ def main():
     model = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR).to(device)
 
     # Dataset（max_len=64）
-    ds = TextDataset(df, tokenizer, max_len=64)
+    ds = PredictionDataset(df, tokenizer, max_len=64)
     loader = torch.utils.data.DataLoader(ds, batch_size=32, shuffle=False)
 
     # 推論（確率）

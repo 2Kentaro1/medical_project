@@ -52,3 +52,28 @@ class TextDataset(Dataset):
             "attention_mask": torch.tensor(encoding["attention_mask"], dtype=torch.long),
             "labels": torch.tensor(self.labels[idx], dtype=torch.float)
         }
+    
+# ★★★ 推論専用 Dataset（judgement が不要） ★★★
+class PredictionDataset(Dataset):
+    def __init__(self, df, tokenizer, max_len=256):
+        self.texts = df["text"].tolist()
+        self.tokenizer = tokenizer
+        self.max_len = max_len
+
+    def __len__(self):
+        return len(self.texts)
+
+    def __getitem__(self, idx):
+        text = self.texts[idx]
+
+        encoding = self.tokenizer(
+            text,
+            truncation=True,
+            padding="max_length",
+            max_length=self.max_len
+        )
+
+        return {
+            "input_ids": torch.tensor(encoding["input_ids"], dtype=torch.long),
+            "attention_mask": torch.tensor(encoding["attention_mask"], dtype=torch.long)
+        }
