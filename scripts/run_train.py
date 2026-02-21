@@ -6,11 +6,17 @@ from sklearn.model_selection import StratifiedKFold
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from torch.optim import AdamW
 
-# src を import path に追加
+# パス設定
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-SRC_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "..", "src"))
-DATA_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "..", "data", "processed", "train_clean.parquet"))
-SAVE_DIR = "/content/drive/MyDrive/medical_project/models"
+SRC_PATH = "/content/medical_project/src"
+DATA_PATH = "/content/drive/MyDrive/medical_project_data/processed/train_clean.parquet"
+
+# ★ モデル名（フォルダ名に変換）
+MODEL_NAME = "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract"
+MODEL_DIR_NAME = MODEL_NAME.split("/")[-1].lower()
+
+# ★ MODEL ごとに保存フォルダを分ける
+SAVE_DIR = f"/content/drive/MyDrive/medical_project/models/{MODEL_DIR_NAME}"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 print("SRC_PATH:", SRC_PATH)  # デバッグ用
@@ -34,7 +40,7 @@ def main():
     df = pd.read_parquet(DATA_PATH)
 
     tokenizer = AutoTokenizer.from_pretrained(
-        "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract"
+        MODEL_NAME
     )
 
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -52,7 +58,7 @@ def main():
         val_loader = torch.utils.data.DataLoader(val_ds, batch_size=16, shuffle=False)
 
         model = AutoModelForSequenceClassification.from_pretrained(
-            "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract",
+            MODEL_NAME,
             num_labels=1
         ).to(device)
 
